@@ -30,7 +30,7 @@ A comprehensive admin dashboard for managing municipal services and user account
 
 1. **Clone the repository**
    ```bash
-   git clone <your-repo-url>
+   git clone https://github.com/BlaBla-03/CityFix-Admin.git
    cd CityFix-Admin
    ```
 
