@@ -1,0 +1,15 @@
+{
+  "projects": {
+    "default": "city-fix-62029"
+  },
+  "targets": {
+    "city-fix-62029": {
+      "hosting": {
+        "admin": [
+          "cityfix-admin"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}
