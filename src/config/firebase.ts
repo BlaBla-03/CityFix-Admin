@@ -4,14 +4,14 @@ import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCZLT8ZPsZgoWXrhRunCEqAb4m7w7DO8vo",
-  authDomain: "city-fix-62029.firebaseapp.com",
-  databaseURL: "https://city-fix-62029-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "city-fix-62029",
-  storageBucket: "city-fix-62029.firebasestorage.app",
-  messagingSenderId: "206334849622",
-  appId: "1:206334849622:web:89e3b858e2eac4350c01f7",
-  measurementId: "G-RBTDZV8LL0"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
 // Initialize Firebase only if it hasn't been initialized already
