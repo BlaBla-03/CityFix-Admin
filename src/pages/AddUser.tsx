@@ -29,8 +29,7 @@ const AddUser: React.FC = () => {
   const [adminPassword, setAdminPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [tempPassword, setTempPassword] = useState('');
-  const [showTempPassword, setShowTempPassword] = useState(false);
+  const [userCreated, setUserCreated] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -79,7 +78,6 @@ const AddUser: React.FC = () => {
     try {
       // Generate a random password for the user
       const generatedTempPassword = Math.random().toString(36).slice(-8);
-      setTempPassword(generatedTempPassword);
       
       const userCred = await createUserWithEmailAndPassword(auth, form.email, generatedTempPassword);
       const uid = userCred.user.uid;
@@ -94,10 +92,9 @@ const AddUser: React.FC = () => {
         role: form.role,
         createdAt: serverTimestamp(),
         requiresPasswordSetup: true,
-        tempPassword: generatedTempPassword,
       });
 
-      setShowTempPassword(true);
+      setUserCreated(true);
     } catch (error: any) {
       throw error;
     }
@@ -140,14 +137,11 @@ const AddUser: React.FC = () => {
             
             {error && <p style={errorText}>{error}</p>}
             
-            {showTempPassword ? (
+            {userCreated ? (
               <div style={tempPasswordContainer}>
                 <h3 style={tempPasswordTitle}>User Created Successfully!</h3>
-                <p style={tempPasswordText}>
-                  Temporary password for {form.email}: <strong>{tempPassword}</strong>
-                </p>
                 <p style={tempPasswordNote}>
-                  Please save this password. The user will need it for their first login.
+                  The user will need to set their password on their first login.
                 </p>
                 <button
                   style={submitButton}
@@ -417,12 +411,6 @@ const tempPasswordTitle: React.CSSProperties = {
   fontWeight: 600,
   color: '#000',
   marginBottom: '1rem',
-};
-
-const tempPasswordText: React.CSSProperties = {
-  fontSize: '1rem',
-  color: '#666',
-  marginBottom: '0.5rem',
 };
 
 const tempPasswordNote: React.CSSProperties = {
