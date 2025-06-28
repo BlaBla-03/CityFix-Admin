@@ -100,6 +100,17 @@ const UserDetails: React.FC = () => {
 
             {error && <p style={errorText}>{error}</p>}
 
+            {user.tempPassword && (
+              <div style={tempPasswordContainer}>
+                <p style={tempPasswordText}>
+                  Temporary password: <strong>{user.tempPassword}</strong>
+                </p>
+                <p style={tempPasswordNote}>
+                  This is the temporary password set for this user. The user will need to change it on their next login.
+                </p>
+              </div>
+            )}
+
             <div style={details}>
               <div style={detailRow}>
                 <span style={label}>Name:</span>

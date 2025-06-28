@@ -21,6 +21,7 @@ const EditUser: React.FC = () => {
     role: 'staff',
   });
   const [municipals, setMunicipals] = useState<Municipal[]>([]);
+  const [tempPassword, setTempPassword] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showConfirm, setShowConfirm] = useState(false);
@@ -43,6 +44,9 @@ const EditUser: React.FC = () => {
             municipal: userData.municipal || '',
             role: userData.role || 'staff',
           });
+          if (userData.tempPassword) {
+            setTempPassword(userData.tempPassword);
+          }
         }
 
         // Fetch municipals
@@ -108,6 +112,10 @@ const EditUser: React.FC = () => {
       // Generate a random password
       const newPassword = Math.random().toString(36).slice(-8);
       
+      // Get the user's email from Firestore
+      const userDoc = await getDoc(doc(db, 'users', id));
+      if (!userDoc.exists()) throw new Error('User not found');
+      
       // Call the HTTP Cloud Function to update the password
       const response = await fetch('https://us-central1-city-fix-62029.cloudfunctions.net/updateUserPassword', {
         method: 'POST',
@@ -127,10 +135,12 @@ const EditUser: React.FC = () => {
       
       // Update Firestore document
       await updateDoc(doc(db, 'users', id), {
+        tempPassword: newPassword,
         requiresPasswordSetup: true,
         updatedAt: new Date(),
       });
 
+      setTempPassword(newPassword);
       setShowResetConfirm(false);
       alert('Password has been reset successfully!');
     } catch (error: any) {
@@ -204,6 +214,17 @@ const EditUser: React.FC = () => {
             <h2 style={title}>Edit User</h2>
             
             {error && <p style={errorText}>{error}</p>}
+            
+            {tempPassword && (
+              <div style={tempPasswordContainer}>
+                <p style={tempPasswordText}>
+                  Temporary password: <strong>{tempPassword}</strong>
+                </p>
+                <p style={tempPasswordNote}>
+                  This is the temporary password set for this user. The user will need to change it on their next login.
+                </p>
+              </div>
+            )}
             
             <form onSubmit={handleSubmit} style={formStyle}>
               <div style={inputGroup}>
@@ -536,22 +557,23 @@ const confirmDeleteButton: React.CSSProperties = {
 };
 
 const tempPasswordContainer: React.CSSProperties = {
-  backgroundColor: '#e8f0fe',
+  backgroundColor: '#f8f9fa',
   padding: '1rem',
   borderRadius: '8px',
-  marginBottom: '1rem',
-  textAlign: 'center',
+  marginBottom: '1.5rem',
+  border: '1px solid #e9ecef',
 };
 
 const tempPasswordText: React.CSSProperties = {
-  fontSize: '1rem',
-  color: '#333',
-  marginBottom: '0.5rem',
+  margin: 0,
+  fontSize: '0.875rem',
+  color: '#666',
 };
 
 const tempPasswordNote: React.CSSProperties = {
-  fontSize: '0.875rem',
-  color: '#666',
+  margin: '0.5rem 0 0 0',
+  fontSize: '0.75rem',
+  color: '#999',
 };
 
 const actionButtonsContainer: React.CSSProperties = {
