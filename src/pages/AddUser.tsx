@@ -1,13 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  createUserWithEmailAndPassword,
-  reauthenticateWithCredential,
-  EmailAuthProvider,
-  getAuth,
-} from 'firebase/auth';
-import { setDoc, doc, serverTimestamp, collection, getDocs } from 'firebase/firestore';
-import { auth, db } from '../config/firebase';
+import { getAuth } from 'firebase/auth';
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from '../config/firebase';
 import Navbar from '../components/Navbar';
 
 interface Municipal {
@@ -77,26 +72,35 @@ const AddUser: React.FC = () => {
 
   const createUser = async () => {
     try {
-      // Generate a random password for the user
-      const generatedTempPassword = Math.random().toString(36).slice(-8);
-      setTempPassword(generatedTempPassword);
-      
-      const userCred = await createUserWithEmailAndPassword(auth, form.email, generatedTempPassword);
-      const uid = userCred.user.uid;
+      const auth = getAuth();
+      const currentUser = auth.currentUser;
+      if (!currentUser) {
+        throw new Error("No user is currently signed in.");
+      }
+      const token = await currentUser.getIdToken();
 
-      // Store user info in Firestore
-      await setDoc(doc(db, 'users', uid), {
-        uid,
-        name: form.name,
-        email: form.email,
-        location: form.role === 'admin' ? '' : form.location,
-        municipal: form.role === 'admin' ? '' : form.municipal,
-        role: form.role,
-        createdAt: serverTimestamp(),
-        requiresPasswordSetup: true,
-        tempPassword: generatedTempPassword,
+      const response = await fetch('https://us-central1-city-fix-62029.cloudfunctions.net/createUser', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          email: form.email,
+          name: form.name,
+          location: form.location,
+          municipal: form.municipal,
+          role: form.role,
+        })
       });
 
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error.message || 'Failed to create user.');
+      }
+
+      const result = await response.json();
+      setTempPassword(result.data.tempPassword);
       setShowTempPassword(true);
     } catch (error: any) {
       throw error;
@@ -108,9 +112,6 @@ const AddUser: React.FC = () => {
     try {
       const currentUser = getAuth().currentUser;
       if (!currentUser || !currentUser.email) throw new Error('No current user');
-
-      const credential = EmailAuthProvider.credential(currentUser.email, adminPassword);
-      await reauthenticateWithCredential(currentUser, credential);
 
       setShowConfirm(false);
       await createUser();
